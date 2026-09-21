@@ -127,10 +127,16 @@ def _complete_anthropic(config: LLMConfig, prompt: str, images: list[bytes] | No
     client = anthropic.Anthropic(api_key=config.api_key)
     content = _anthropic_content(prompt, images)
     # Current Anthropic models (Claude 5 family) control response character via
-    # reasoning effort rather than `temperature`, which the API no longer accepts.
+    # reasoning effort rather than `temperature`, which the API no longer accepts,
+    # and default to extended thinking that otherwise eats most of max_tokens
+    # before any visible text is written (seen directly: a 4096-token budget
+    # produced ~3700 thinking tokens and a truncated, unparsable JSON bundle).
+    # Thinking is disabled and the budget raised so the largest prompt (the
+    # seven-document bundle) has room to finish.
     response = client.messages.create(
         model=config.resolved_model(),
-        max_tokens=4096,
+        max_tokens=8192,
+        thinking={"type": "disabled"},
         messages=[{"role": "user", "content": content}],
     )
     return "".join(block.text for block in response.content if block.type == "text")

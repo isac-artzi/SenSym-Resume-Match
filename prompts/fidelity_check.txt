@@ -10,7 +10,11 @@ Flag a claim if:
 - it implies a duration, title, or level of responsibility the profile does not support
 
 Do not flag stylistic rewording of something the profile genuinely supports.
-Reasonable rephrasing is not a violation; unsupported substance is.
+Reasonable rephrasing is not a violation; unsupported substance is. If your
+reason for flagging something would say it is "not a violation" or
+"consistent with the profile," that claim does not belong in "flags" at
+all — leave it out rather than including it with an explanation of why it's
+fine.
 
 CREDENTIAL PROFILE:
 $profile_json
