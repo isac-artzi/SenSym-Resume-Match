@@ -91,8 +91,29 @@ def usable_width(document: docx.Document) -> Inches:
     return section.page_width - section.left_margin - section.right_margin
 
 
+# (size, color, small_caps) per heading level — applied to each run directly,
+# not just left to the style definition. Real Microsoft Word resolves a
+# paragraph's style-level formatting correctly, but other DOCX renderers
+# (Google Docs, LibreOffice, Apple Pages, various online viewers) are known to
+# be inconsistent about honoring custom style definitions written by
+# python-docx, and can silently fall back to plain black text. Setting the
+# same formatting on the run itself is unambiguous in every renderer.
+_HEADING_RUN_STYLE = {
+    0: (Pt(26), ACCENT_COLOR, False),
+    1: (Pt(13), ACCENT_COLOR, True),
+    2: (Pt(11.5), TEXT_COLOR, False),
+}
+
+
 def add_heading(document: docx.Document, text: str, level: int = 1):
     heading = document.add_heading(text, level=level)
+    size, color, small_caps = _HEADING_RUN_STYLE.get(level, (BODY_SIZE, TEXT_COLOR, False))
+    for run in heading.runs:
+        run.font.name = BODY_FONT
+        run.font.size = size
+        run.font.color.rgb = color
+        run.font.bold = True
+        run.font.small_caps = small_caps
     if level == 1:
         heading.paragraph_format.space_before = Pt(14)
         heading.paragraph_format.space_after = Pt(4)
