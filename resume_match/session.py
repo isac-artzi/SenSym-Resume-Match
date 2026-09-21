@@ -24,6 +24,26 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 CREDENTIAL_EXTS = {".pdf", ".docx", ".txt", ".md", ".png", ".jpg", ".jpeg", ".webp"}
 JOB_EXTS = {".pdf", ".docx", ".txt", ".md"}
 
+# Maps each config key to the Setup form widget that displays it, so
+# load_config_values() can keep both in sync — see its docstring for why
+# that's necessary.
+FORM_WIDGET_KEYS = {
+    "LLM_PROVIDER": "form_provider",
+    "API_KEY": "form_api_key",
+    "OLLAMA_BASE_URL": "form_ollama_url",
+    "MODEL": "form_model",
+    "CREDENTIALS_DIR": "form_CREDENTIALS_DIR",
+    "JOBS_DIR": "form_JOBS_DIR",
+    "OUTPUT_DIR": "form_OUTPUT_DIR",
+    "STUDENT_NAME": "form_STUDENT_NAME",
+    "TARGET_ROLE": "form_TARGET_ROLE",
+    "TONE": "form_TONE",
+    "RESUME_MAX_PAGES": "form_RESUME_MAX_PAGES",
+    "AVOID": "form_AVOID",
+    "DRIVE_CREDENTIALS_URL": "DRIVE_CREDENTIALS_URL_input",
+    "DRIVE_JOBS_URL": "DRIVE_JOBS_URL_input",
+}
+
 
 def init_state() -> None:
     defaults = {
@@ -37,6 +57,7 @@ def init_state() -> None:
         "drive_job_files": [],
         "cost_estimate": None,
         "cost_estimate_key": None,
+        "config_upload_id": None,  # last-processed uploaded config's file_id, to avoid reprocessing
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -44,8 +65,29 @@ def init_state() -> None:
     if not st.session_state.env_autoloaded:
         local_env = config_mod.load_env_file(REPO_ROOT / "resume_match.env")
         if local_env:
-            st.session_state.config_values.update(local_env)
+            load_config_values(local_env)
         st.session_state.env_autoloaded = True
+
+
+def load_config_values(parsed: dict) -> None:
+    """Merge parsed config values into session state, including the Setup
+    form's widget-backed keys.
+
+    Necessary because a Streamlit widget created with a `key=` ignores its
+    `value=`/`index=` argument on every render after the first — and the
+    "Fill in the form" tab's widgets are created on every run regardless of
+    which tab is visible (`st.tabs()` still executes hidden tab content).
+    Updating `config_values` alone therefore doesn't change what those
+    widgets show; on the very next line they'd read their own stale
+    session-state value and immediately overwrite config_values with it.
+    Setting each widget's session_state key directly, before that widget is
+    (re-)created, is what actually takes effect — this must run before
+    render_setup() so the values exist first.
+    """
+    st.session_state.config_values.update(parsed)
+    for config_key, widget_key in FORM_WIDGET_KEYS.items():
+        if config_key in parsed:
+            st.session_state[widget_key] = parsed[config_key]
 
 
 def current_config() -> config_mod.AppConfig:

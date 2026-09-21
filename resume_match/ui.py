@@ -267,3 +267,15 @@ def status_line(text: str) -> None:
 
 def fidelity_flag(text: str) -> None:
     st.markdown(f'<div class="sr-flag">⚑ {text}</div>', unsafe_allow_html=True)
+
+
+def value_kw(widget_key: str, value) -> dict:
+    """Avoid Streamlit's "value ignored, using session_state" warning: only pass an
+    explicit default for a widget that doesn't already have a stored value (from
+    an auto-loaded or uploaded config) — see session.load_config_values()."""
+    return {} if widget_key in st.session_state else {"value": value}
+
+
+def index_kw(widget_key: str, index: int) -> dict:
+    """Same as value_kw(), for widgets (like st.radio) that take `index=` instead."""
+    return {} if widget_key in st.session_state else {"index": index}

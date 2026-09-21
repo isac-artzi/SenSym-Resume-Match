@@ -20,6 +20,8 @@ ui.inject_css()
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 TT = ui.TOOLTIPS
+_value_kw = ui.value_kw
+_index_kw = ui.index_kw
 
 
 # --- Section 1: Setup -------------------------------------------------------
@@ -33,30 +35,42 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
         uploaded = st.file_uploader(
             "resume_match.env", type=["env", "txt"], key="config_upload", help=TT["config_upload"]
         )
-        if uploaded is not None:
-            st.session_state.config_values.update(config_mod.parse_env_text(uploaded.getvalue().decode("utf-8")))
+        # Process a given upload once, not on every rerun — the file stays attached to this
+        # widget until removed, and reprocessing it every run would keep reverting any edit
+        # made afterward in the "Fill in the form" tab back to the uploaded values.
+        if uploaded is not None and uploaded.file_id != st.session_state.get("config_upload_id"):
+            session.load_config_values(config_mod.parse_env_text(uploaded.getvalue().decode("utf-8")))
+            st.session_state.config_upload_id = uploaded.file_id
             st.success("Config loaded for this session.")
 
     with form_tab:
+        provider_index = config_mod.PROVIDERS.index(cfg.provider) if cfg.provider in config_mod.PROVIDERS else 0
         provider = st.radio(
             "AI provider",
             config_mod.PROVIDERS,
-            index=config_mod.PROVIDERS.index(cfg.provider) if cfg.provider in config_mod.PROVIDERS else 0,
             horizontal=True,
             key="form_provider",
             help=TT["provider"],
+            **_index_kw("form_provider", provider_index),
         )
         st.session_state.config_values["LLM_PROVIDER"] = provider
 
         if provider != "ollama":
             api_key = st.text_input(
-                "API key", value=cfg.api_key, type="password", key="form_api_key", help=TT["api_key"]
+                "API key",
+                type="password",
+                key="form_api_key",
+                help=TT["api_key"],
+                **_value_kw("form_api_key", cfg.api_key),
             )
             st.session_state.config_values["API_KEY"] = api_key
         else:
             st.session_state.config_values["API_KEY"] = ""
             ollama_url = st.text_input(
-                "Ollama base URL", value=cfg.ollama_base_url, key="form_ollama_url", help=TT["ollama_url"]
+                "Ollama base URL",
+                key="form_ollama_url",
+                help=TT["ollama_url"],
+                **_value_kw("form_ollama_url", cfg.ollama_base_url),
             )
             st.session_state.config_values["OLLAMA_BASE_URL"] = ollama_url
 
@@ -67,7 +81,10 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
                 ("Jobs folder", "JOBS_DIR", "examples/jobs"),
                 ("Output folder", "OUTPUT_DIR", "applications"),
             ]:
-                value = st.text_input(label, value=cfg.get(key, default), key=f"form_{key}", help=TT[key])
+                widget_key = f"form_{key}"
+                value = st.text_input(
+                    label, key=widget_key, help=TT[key], **_value_kw(widget_key, cfg.get(key, default))
+                )
                 st.session_state.config_values[key] = value
 
         with st.expander("Preferences (optional)"):
@@ -78,12 +95,18 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
                 ("Resume max pages", "RESUME_MAX_PAGES"),
                 ("Things to avoid", "AVOID"),
             ]:
-                value = st.text_input(label, value=cfg.get(key), key=f"form_{key}", help=TT[key])
+                widget_key = f"form_{key}"
+                value = st.text_input(
+                    label, key=widget_key, help=TT[key], **_value_kw(widget_key, cfg.get(key))
+                )
                 st.session_state.config_values[key] = value
 
         with st.expander("Advanced", expanded=False):
             model = st.text_input(
-                "Model (blank = provider default)", value=cfg.model, key="form_model", help=TT["model"]
+                "Model (blank = provider default)",
+                key="form_model",
+                help=TT["model"],
+                **_value_kw("form_model", cfg.model),
             )
             st.session_state.config_values["MODEL"] = model
 
@@ -102,12 +125,13 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
 def render_drive_fetch(cfg: config_mod.AppConfig, config_key: str, session_key: str, tooltip_key: str) -> None:
     """A link field + fetch button for an optional public Google Drive folder.
     Fetched files land in st.session_state[session_key] and get merged in by the caller."""
+    widget_key = f"{config_key}_input"
     url = st.text_input(
         "Or fetch from a public Google Drive folder link",
-        value=cfg.get(config_key, ""),
-        key=f"{config_key}_input",
+        key=widget_key,
         placeholder="https://drive.google.com/drive/folders/...",
         help=TT[tooltip_key],
+        **_value_kw(widget_key, cfg.get(config_key, "")),
     )
     st.session_state.config_values[config_key] = url
     if st.button("Fetch from Drive", key=f"fetch_{session_key}", disabled=not url.strip(), help=TT["fetch_drive"]):
