@@ -1,0 +1,29 @@
+Summit Cloud Technologies — Backend Engineer (New Grad)
+
+Summit Cloud Technologies is a fictional company used for demo purposes only.
+
+About the role:
+Summit Cloud is hiring a backend engineer to join our platform team. This
+team owns the services that every other team at the company depends on for
+request routing, authentication, and internal messaging. This is a
+production-facing role from day one.
+
+Requirements:
+- 2+ years of professional experience operating services in production
+  Kubernetes clusters
+- Strong proficiency in Go; our entire platform layer is written in Go
+- Hands-on experience with Kafka or a comparable distributed messaging system
+  in a production environment
+- Experience designing and debugging distributed systems at scale
+- B.S. in Computer Science or equivalent practical experience
+
+Nice to have:
+- Experience with Python or another scripting language for tooling
+- Familiarity with SQL and relational databases
+- Prior experience with infrastructure-as-code (Terraform or similar)
+
+Compensation: competitive salary + equity, based in Denver, CO (relocation
+assistance available) or remote within the US.
+
+This role reports to the Platform Engineering manager and works closely with
+SRE on call rotations after a 90-day ramp-up period.

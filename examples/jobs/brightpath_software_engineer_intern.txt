@@ -1,0 +1,31 @@
+BrightPath Systems — Software Engineering Intern (Summer 2026)
+
+BrightPath Systems is a fictional company used for demo purposes only.
+
+About the role:
+We're looking for a software engineering intern to join our small backend
+team for the summer. You'll work directly with two senior engineers on our
+internal tools team, building features used by other teams inside the
+company. This is a hands-on role — you'll ship real code in your first two
+weeks.
+
+What you'll do:
+- Build and maintain internal dashboard and tooling features in Python
+- Write tests for the code you ship
+- Participate in code review, both giving and receiving feedback
+- Work with a SQL database (PostgreSQL) for day-to-day feature work
+
+What we're looking for:
+- Currently pursuing a B.S. in Computer Science or a related field
+- Comfortable writing Python; some experience with a web framework (Flask,
+  Django, or similar) is a strong plus
+- Some exposure to SQL and relational databases
+- Familiarity with Git and a normal code review workflow
+- Nice to have: any exposure to Docker or containerized deployments
+
+Nice to have but not required:
+- Frontend experience (JavaScript, React)
+- Experience with cloud platforms like AWS
+
+This is a paid, full-time summer internship (12 weeks) based in Phoenix, AZ,
+with a hybrid on-site expectation of 3 days/week.
