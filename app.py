@@ -187,6 +187,7 @@ def render_jobs(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, bytes]]
 
 def render_generate(
     cfg: config_mod.AppConfig,
+    mode: str,
     credential_files: list[tuple[str, bytes]],
     selected_jobs: list[tuple[str, bytes]],
 ) -> None:
@@ -212,8 +213,7 @@ def render_generate(
     if st.button(
         "Create application materials", type="primary", disabled=disabled, help=TT["generate_button"]
     ):
-        session.run_generation(cfg, credential_files, selected_jobs)
-        st.rerun()
+        session.run_generation(cfg, mode, credential_files, selected_jobs)
 
     for problem in problems:
         st.caption(f"⚑ {problem}")
@@ -288,9 +288,9 @@ def render_review(cfg: config_mod.AppConfig, mode: str) -> None:
                 "Regenerate this job's documents", key=f"regen_{folder_name}", help=TT["regenerate"]
             ):
                 try:
-                    session.regenerate_job(cfg, entry)
-                except LLMError as exc:
-                    st.error(str(exc))
+                    session.regenerate_job(cfg, mode, entry)
+                except Exception as exc:  # noqa: BLE001 - any failure here must be visible, not silent
+                    st.error(str(exc) if isinstance(exc, LLMError) else f"Unexpected error: {exc}")
                 else:
                     st.rerun()
 
@@ -328,7 +328,7 @@ def main() -> None:
 
     credential_files = render_materials(mode, cfg)
     selected_jobs = render_jobs(mode, cfg)
-    render_generate(cfg, credential_files, selected_jobs)
+    render_generate(cfg, mode, credential_files, selected_jobs)
     render_review(cfg, mode)
 
 

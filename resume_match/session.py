@@ -89,10 +89,18 @@ def read_local_folder(folder: Path, allowed_exts: set[str]) -> list[tuple[str, b
 
 def run_generation(
     cfg: config_mod.AppConfig,
+    mode: str,
     credential_files: list[tuple[str, bytes]],
     selected_jobs: list[tuple[str, bytes]],
 ) -> None:
-    """The Generate button's action: profile once, then per-job analyze/write/check/render."""
+    """The Generate button's action: profile once, then per-job analyze/write/check/render.
+
+    Every per-job failure — model error or anything else — is caught, shown
+    with `st.error()`, and the batch moves on to the next job rather than
+    stopping silently. (A prior version of this app called `st.rerun()`
+    right after this function returned, which wiped any error shown here
+    before it could be read — fixed by not doing that; see app.py.)
+    """
     llm_config = current_llm_config(cfg)
     progress = st.progress(0.0)
     status = st.empty()
@@ -110,8 +118,8 @@ def run_generation(
         try:
             st.session_state.profile = pipeline.build_profile(source_text, preferences_text, llm_config)
             st.session_state.profile_source_key = source_key
-        except LLMError as exc:
-            st.error(str(exc))
+        except Exception as exc:  # noqa: BLE001 - any failure here must be visible, not silent
+            st.error(str(exc) if isinstance(exc, LLMError) else f"Could not build your credential profile: {exc}")
             return
     profile = st.session_state.profile
 
@@ -133,18 +141,15 @@ def run_generation(
             fidelity = pipeline.fidelity_check(profile, bundle, llm_config)
             status.text(f"[{i + 1}/{total}] {job_analysis.get('company', job_name)}: rendering...")
             files = render.render_all(profile, job_analysis, bundle, fidelity)
-        except LLMError as exc:
-            st.error(f"{job_name}: {exc}")
-            progress.progress((i + 1) / total)
-            continue
-
-        save_result(cfg, job_name, job_text, job_analysis, bundle, fidelity, files)
+            save_result(cfg, mode, job_name, job_text, job_analysis, bundle, fidelity, files)
+        except Exception as exc:  # noqa: BLE001 - one bad job must not silently end the batch
+            st.error(f"{job_name}: {exc if isinstance(exc, LLMError) else f'unexpected error — {exc}'}")
         progress.progress((i + 1) / total)
 
     status.text("Done.")
 
 
-def save_result(cfg, source_name, job_text, job_analysis, bundle, fidelity, files) -> str:
+def save_result(cfg, mode: str, source_name, job_text, job_analysis, bundle, fidelity, files) -> str:
     folder_name = render.job_folder_name(job_analysis.get("company", ""), job_analysis.get("role", ""))
     st.session_state.results[folder_name] = {
         "source_name": source_name,
@@ -155,12 +160,12 @@ def save_result(cfg, source_name, job_text, job_analysis, bundle, fidelity, file
         "files": files,
     }
     output_dir = cfg.output_dir()
-    if output_dir is not None:
+    if mode == "local" and output_dir is not None:
         render.write_to_folder(files, output_dir, job_analysis.get("company", ""), job_analysis.get("role", ""))
     return folder_name
 
 
-def regenerate_job(cfg: config_mod.AppConfig, entry: dict) -> None:
+def regenerate_job(cfg: config_mod.AppConfig, mode: str, entry: dict) -> None:
     """Re-run analysis/bundle/fidelity/render for one job and overwrite its result."""
     llm_config = current_llm_config(cfg)
     updated = pipeline.run_for_job(
@@ -175,6 +180,7 @@ def regenerate_job(cfg: config_mod.AppConfig, entry: dict) -> None:
     )
     save_result(
         cfg,
+        mode,
         entry["source_name"],
         entry["job_text"],
         updated["job_analysis"],

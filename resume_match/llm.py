@@ -131,11 +131,14 @@ def _complete_anthropic(config: LLMConfig, prompt: str, images: list[bytes] | No
     # and default to extended thinking that otherwise eats most of max_tokens
     # before any visible text is written (seen directly: a 4096-token budget
     # produced ~3700 thinking tokens and a truncated, unparsable JSON bundle).
-    # Thinking is disabled and the budget raised so the largest prompt (the
-    # seven-document bundle) has room to finish.
+    # Thinking is disabled so the full budget goes to visible output. max_tokens
+    # is set well above what a synthetic test profile needed (~3800 for the
+    # seven-document bundle) because a real student's fuller history produces a
+    # bigger bundle; Sonnet 5 supports up to 128k here, so there's no cost or
+    # latency downside to a generous ceiling — it only caps a worst case.
     response = client.messages.create(
         model=config.resolved_model(),
-        max_tokens=8192,
+        max_tokens=16000,
         thinking={"type": "disabled"},
         messages=[{"role": "user", "content": content}],
     )
