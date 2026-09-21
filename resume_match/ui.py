@@ -22,7 +22,9 @@ PRIVACY_LINE = (
     "session and disappears when you close it."
 )
 
-WORDMARK_TEXT = "SenSym"  # TODO: replace with the real SVG wordmark once brand assets arrive
+SENSYM_URL = "https://sensym.ai"
+WORDMARK_TEXT = "SenSym™"  # TODO: replace with the real SVG wordmark once brand assets arrive
+FREE_APP_LINE = f'A free app from SenSym™ — <a href="{SENSYM_URL}" target="_blank" rel="noopener">sensym.ai</a>'
 
 
 def inject_css() -> None:
@@ -64,6 +66,18 @@ def inject_css() -> None:
             font-size: 1.02rem;
             color: {MUTED_TEXT_COLOR};
             margin-bottom: 1rem;
+        }}
+
+        .sr-free-app {{
+            font-size: 0.85rem;
+            color: {MUTED_TEXT_COLOR};
+            margin-bottom: 0.75rem;
+        }}
+
+        .sr-free-app a {{
+            color: {ACCENT_COLOR};
+            text-decoration: none;
+            border-bottom: 1px solid {BORDER_COLOR};
         }}
 
         .sr-privacy {{
@@ -117,6 +131,7 @@ def render_header() -> None:
     st.markdown(f'<div class="sr-wordmark">{WORDMARK_TEXT}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="sr-title">{APP_NAME}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="sr-tagline">{APP_TAGLINE}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sr-free-app">{FREE_APP_LINE}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="sr-privacy">{PRIVACY_LINE}</div>', unsafe_allow_html=True)
 
 

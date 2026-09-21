@@ -1,10 +1,17 @@
-# SenSym Resume Match
+# SenSym™ Resume Match
 
 A free, open-source Streamlit app that turns your resume, transcripts, and a
 job posting into a complete, honest application bundle: a tailored resume,
 cover letter, introduction email, LinkedIn message, elevator pitch,
 interview-prep notes, and a gap analysis — all as DOCX files you can open and
 edit in Word.
+
+This app is provided free of charge by **SenSym™** ([sensym.ai](https://sensym.ai))
+as a tool for students and early-career job seekers. There's no catch and no
+paywall in the app itself — you only ever pay your own AI provider directly
+for the model calls the app makes on your behalf (see "Getting an API key"
+below); SenSym never charges for the app and never sees your API key or your
+documents.
 
 **The guiding rule for every generated word: present you in the best honest
 light. Never invent, never embellish.** Everything the app writes about you
@@ -37,8 +44,7 @@ configured actually exist on the machine running the app, it's local mode;
 otherwise it shows you the upload controls. You never have to choose; just
 open the app the way you want to run it.
 
-**Hosted app:** _add the Streamlit Community Cloud URL here once deployed_
-(Setup → deploy this repo at [share.streamlit.io](https://share.streamlit.io)).
+**Hosted app:** [sensym-resume-match-qpqhdbnvu93cut9trqbvyd.streamlit.app](https://sensym-resume-match-qpqhdbnvu93cut9trqbvyd.streamlit.app/) — open it and start using it right away, no setup required.
 
 ## Quick start (local)
 
@@ -226,4 +232,8 @@ finished, un-reviewable artifact.
 ## License
 
 MIT — see `LICENSE`. This is a teaching artifact as much as a tool; see
-[`EXTENDING.md`](EXTENDING.md) if you want to build on it.
+[`EXTENDING.md`](EXTENDING.md) if you want to build on it. The code is
+open source under MIT; "SenSym" and the SenSym™ name and branding are
+trademarks of SenSym LLC and aren't covered by the code license — fork and
+extend the app freely, just don't reuse the SenSym name/branding for a
+different or competing product.
