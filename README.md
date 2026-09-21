@@ -15,17 +15,30 @@ The app stores nothing — no database, no accounts, no logging of your
 documents. You bring your own AI key (Anthropic, OpenAI, Gemini, or a local
 Ollama model) and pay your own model costs, typically a few cents per job.
 
-## Two ways to run it
+## Runs locally or on Streamlit Community Cloud — your choice
+
+This is the same app, the same repo, and the same code either way. Run it
+on your own computer for full control (folders on disk, local Ollama
+models, nothing ever leaves your machine except calls to your chosen AI
+provider), or use the hosted version on Streamlit Community Cloud for
+zero-setup access from any browser, no `git clone` or Python install
+required. Switch between them freely — a config file downloaded from one
+works in the other.
 
 | | Local | Cloud |
 |---|---|---|
-| Setup | `git clone`, `pip install`, `streamlit run app.py` | Open the hosted Streamlit Community Cloud URL |
+| Setup | `git clone`, `pip install`, `streamlit run app.py` | Open the hosted Streamlit Community Cloud URL — nothing to install |
 | Your files | Point the app at folders on your computer | Drag-and-drop upload (or a `.zip`) |
 | Output | Written to a folder on your computer | Downloaded as a `.zip`, plus individual file downloads |
+| Local models (Ollama) | Supported | Not reachable from the cloud |
 
 The app detects which mode you're in automatically — if the folders you
 configured actually exist on the machine running the app, it's local mode;
-otherwise it shows you the upload controls.
+otherwise it shows you the upload controls. You never have to choose; just
+open the app the way you want to run it.
+
+**Hosted app:** _add the Streamlit Community Cloud URL here once deployed_
+(Setup → deploy this repo at [share.streamlit.io](https://share.streamlit.io)).
 
 ## Quick start (local)
 
@@ -57,9 +70,20 @@ copy `resume_match.env.example` to `resume_match.env` and edit it by hand.
 
 ## Quick start (cloud)
 
-Open the hosted app URL, fill in the Setup form (or upload a config file),
-then drag your files into the Materials and Jobs uploaders instead of typing
-folder paths. Everything else is the same.
+No install, no clone, no terminal — just a browser.
+
+1. Open the hosted app URL (see "Hosted app" above).
+2. **Setup** — pick a provider and paste your API key, or upload a
+   `resume_match.env` file if you have one saved from before.
+3. **Your materials** — drag in your resume, transcripts, and anything else
+   worth including, or a `.zip` of them, instead of typing a folder path.
+4. **Jobs** — drag in your saved job postings the same way.
+5. **Generate** and **Review** — identical to local mode from here: tick the
+   jobs you want, generate, check any fidelity flags, and download — either
+   file by file or as one `.zip` of everything.
+
+Nothing you upload touches the server's disk beyond a temporary file used to
+assemble your ZIP download, deleted immediately after — see "Privacy" below.
 
 ## Getting an API key
 
