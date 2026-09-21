@@ -21,8 +21,8 @@ FIELDS = [
     ("CREDENTIALS_DIR", "local mode", ""),
     ("JOBS_DIR", "local mode", ""),
     ("OUTPUT_DIR", "local mode", ""),
-    ("DRIVE_CREDENTIALS_URL", "cloud mode, optional; deferred to v1.1", ""),
-    ("DRIVE_JOBS_URL", "cloud mode, optional; deferred to v1.1", ""),
+    ("DRIVE_CREDENTIALS_URL", "cloud mode, optional", ""),
+    ("DRIVE_JOBS_URL", "cloud mode, optional", ""),
     ("STUDENT_NAME", "optional", ""),
     ("TARGET_ROLE", "optional", ""),
     ("TONE", 'optional, e.g. "confident but understated"', ""),
@@ -33,7 +33,7 @@ FIELDS = [
 SECTION_BREAKS = {
     "LLM_PROVIDER": "--- AI provider ---",
     "CREDENTIALS_DIR": "--- Folders (local mode) ---",
-    "DRIVE_CREDENTIALS_URL": "--- Folders (cloud mode, optional; deferred to v1.1) ---",
+    "DRIVE_CREDENTIALS_URL": "--- Folders (cloud mode, optional) ---",
     "STUDENT_NAME": "--- Student preferences (all optional) ---",
 }
 

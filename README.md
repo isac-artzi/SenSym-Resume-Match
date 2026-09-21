@@ -130,8 +130,9 @@ Then, in the app:
    transcripts, and anything else worth including (see "What goes in your
    credentials folder").
 3. **Jobs** — point the app at a folder of saved job postings.
-4. **Generate** — tick the jobs you want, and click "Create application
-   materials."
+4. **Generate** — tick the jobs you want; a rough cost estimate appears
+   above the button (skip this if you're on Ollama — local models have no
+   per-token cost). Click "Create application materials."
 5. **Review** — read through each document, check any fidelity flags, and
    download.
 
@@ -148,14 +149,21 @@ No install, no clone, no terminal — just a browser.
 2. **Setup** — pick a provider and paste your API key, or upload a
    `resume_match.env` file if you have one saved from before.
 3. **Your materials** — drag in your resume, transcripts, and anything else
-   worth including, or a `.zip` of them, instead of typing a folder path.
-4. **Jobs** — drag in your saved job postings the same way.
-5. **Generate** and **Review** — identical to local mode from here: tick the
-   jobs you want, generate, check any fidelity flags, and download — either
-   file by file or as one `.zip` of everything.
+   worth including, or a `.zip` of them, instead of typing a folder path. Or
+   paste a public Google Drive folder link ("Anyone with the link can view")
+   and click "Fetch from Drive" — upload is the more reliable path, so treat
+   Drive as a convenience and fall back to upload if a fetch fails.
+4. **Jobs** — drag in your saved job postings the same way (upload, `.zip`,
+   or a Drive folder link).
+5. **Generate** — before you click, a rough cost estimate appears based on
+   your documents and provider's pricing. It's an estimate, not a bill —
+   your provider's own usage dashboard is the source of truth.
+6. **Review** — tick the jobs you want, generate, check any fidelity flags,
+   and download — either file by file or as one `.zip` of everything.
 
 Nothing you upload touches the server's disk beyond a temporary file used to
-assemble your ZIP download, deleted immediately after — see "Privacy" below.
+assemble your ZIP download (or fetch a Drive folder), deleted immediately
+after — see "Privacy" below.
 
 ## Getting an API key
 

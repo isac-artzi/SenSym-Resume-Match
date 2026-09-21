@@ -99,6 +99,21 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
 # --- Section 2: Materials ---------------------------------------------------
 
 
+def render_drive_fetch(cfg: config_mod.AppConfig, config_key: str, session_key: str, tooltip_key: str) -> None:
+    """A link field + fetch button for an optional public Google Drive folder.
+    Fetched files land in st.session_state[session_key] and get merged in by the caller."""
+    url = st.text_input(
+        "Or fetch from a public Google Drive folder link",
+        value=cfg.get(config_key, ""),
+        key=f"{config_key}_input",
+        placeholder="https://drive.google.com/drive/folders/...",
+        help=TT[tooltip_key],
+    )
+    st.session_state.config_values[config_key] = url
+    if st.button("Fetch from Drive", key=f"fetch_{session_key}", disabled=not url.strip(), help=TT["fetch_drive"]):
+        session.fetch_drive(session_key, url)
+
+
 def render_materials(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, bytes]]:
     ui.section_title("2. Your materials")
 
@@ -112,14 +127,8 @@ def render_materials(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, by
             key="credentials_upload",
             help=TT["credentials_upload"],
         )
-        files = session.expand_uploads(uploaded)
-        st.text_input(
-            "Or fetch from a public Google Drive folder link",
-            key="drive_credentials_url",
-            disabled=True,
-            placeholder="Coming in v1.1",
-            help=TT["drive_credentials"],
-        )  # TODO(v1.1): fetch via gdown when DRIVE_CREDENTIALS_URL is set
+        render_drive_fetch(cfg, "DRIVE_CREDENTIALS_URL", "drive_credential_files", "drive_credentials")
+        files = session.expand_uploads(uploaded) + st.session_state.drive_credential_files
 
     if files:
         names = [name for name, _ in files]
@@ -154,7 +163,8 @@ def render_jobs(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, bytes]]
             key="jobs_upload",
             help=TT["jobs_upload"],
         )
-        files = session.expand_uploads(uploaded)
+        render_drive_fetch(cfg, "DRIVE_JOBS_URL", "drive_job_files", "drive_jobs")
+        files = session.expand_uploads(uploaded) + st.session_state.drive_job_files
 
     if not files:
         st.info(
@@ -181,7 +191,21 @@ def render_generate(
     selected_jobs: list[tuple[str, bytes]],
 ) -> None:
     ui.section_title("4. Generate")
-    st.caption("Cost estimate coming in v1.1.")  # TODO(v1.1): estimate cost from token counts + provider pricing
+
+    if credential_files and selected_jobs:
+        llm_config = session.current_llm_config(cfg)
+        if llm_config.provider == "ollama":
+            st.caption("Ollama runs on your own computer — no per-token cost, just your own compute time.")
+        else:
+            estimate = session.get_cost_estimate(cfg, credential_files, selected_jobs)
+            st.caption(
+                f"Estimated cost: ~${estimate['cost_usd']:.2f} for {len(selected_jobs)} job(s) on "
+                f"{llm_config.provider} ({llm_config.resolved_model()}) — roughly "
+                f"{estimate['input_tokens']:,} input and {estimate['output_tokens']:,} output tokens. "
+                "This is a rough estimate, not a bill — actual cost depends on your documents."
+            )
+    else:
+        st.caption("Add materials and select at least one job to see a cost estimate here.")
 
     problems = config_mod.validate(cfg)
     disabled = bool(problems) or not credential_files or not selected_jobs

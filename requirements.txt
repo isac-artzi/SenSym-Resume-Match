@@ -7,3 +7,4 @@ beautifulsoup4>=4.12
 anthropic>=0.34
 openai>=1.40
 google-genai>=0.3
+gdown>=5.2

@@ -59,13 +59,18 @@ TOOLTIPS = {
     "credentials_upload": "Any mix of PDF, DOCX, TXT, MD, or image files (scanned "
     "diplomas/transcripts), plus an optional links.txt (one URL per line) and preferences.txt. "
     "A single .zip containing all of them works too.",
-    "drive_credentials": "Fetch credentials from a public Google Drive folder link instead of "
-    "uploading files. Not available yet — upload files or a .zip above.",
+    "drive_credentials": "A link to a Google Drive folder shared as \"Anyone with the link can "
+    "view.\" Fetches alongside anything you've already uploaded. Upload is the more reliable "
+    "path — use this as a convenience, and fall back to upload if a fetch fails.",
+    "fetch_drive": "Downloads every file in that folder and adds it to the list above. Nothing "
+    "from the folder is kept on the server beyond this step.",
     "resume_selectbox": "More than one file here looks like a resume. Pick the one to treat as "
     "primary — the others are still read as supporting evidence.",
     "jobs_upload": "One file per posting works best. Postings from LinkedIn/Workday-style "
     "sites usually need to be saved as a file first (Print → Save as PDF) — see the README for "
     "why. A single .zip of all your postings works too.",
+    "drive_jobs": "A link to a Google Drive folder of saved job postings, shared as \"Anyone "
+    "with the link can view.\" Same convenience as the credentials one above.",
     "select_all": "Toggle every posting below on or off at once.",
     "generate_button": "Builds your credential profile once, then for each selected job: "
     "analyzes the posting, writes all seven documents, and checks them against your profile. "

@@ -87,14 +87,24 @@ bundle to a Google Drive folder the student owns instead of downloading a
 ZIP. Each of these is its own small project; start with read-only fetching
 before attempting to write anywhere.
 
-## Already deferred to v1.1 (marked `# TODO(v1.1)` in the code)
+## Shipped since the demo build
 
-- **Google Drive folder input** in cloud mode (`app.py`, near the Materials
-  and Jobs sections) — fetch credentials/jobs from a public Drive folder
-  link via `gdown`, as a convenience alongside upload.
-- **Cost estimate before generation** (`app.py`, near the Generate button) —
-  estimate token counts from the gathered source text and show an
-  approximate dollar cost per provider's published pricing.
+Two things originally deferred to v1.1 are now in `main`: Google Drive
+folder input (`resume_match/drive.py`, wired into the Materials and Jobs
+sections of `app.py`) and a pre-generation cost estimate
+(`resume_match/cost.py`, shown near the Generate button). Both are good
+examples if you want to see the "optional convenience, upload/no-estimate
+still works fine without it" pattern this app leans on — Drive fetch
+failures fall back to a friendly message rather than blocking anything, and
+the cost estimate is explicitly labeled approximate rather than treated as
+a real bill.
+
+If you touch either: `resume_match/cost.py`'s per-job token constants
+(`BASE_INPUT_TOKENS_PER_JOB`, `BASE_OUTPUT_TOKENS_PER_JOB`) were derived
+from a handful of real runs against Claude Sonnet 5 with extended thinking
+disabled — if you change what the bundle prompt asks for, or the provider
+pricing in `PROVIDER_PRICING` goes stale, re-derive both from a real run
+rather than guessing.
 
 Both are good first contributions: scoped, don't touch the pipeline's
 correctness, and have a clear "done" state.

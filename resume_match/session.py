@@ -16,7 +16,8 @@ from pathlib import Path
 import streamlit as st
 
 from resume_match import config as config_mod
-from resume_match import ingest, pipeline, render
+from resume_match import cost, drive, ingest, pipeline, render
+from resume_match.drive import DriveFetchError
 from resume_match.llm import LLMConfig, LLMError
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -32,6 +33,10 @@ def init_state() -> None:
         "profile": None,
         "profile_source_key": None,
         "results": {},  # job_folder_name -> {source_name, job_text, job_analysis, bundle, fidelity, files}
+        "drive_credential_files": [],  # (filename, bytes) fetched from a public Drive folder
+        "drive_job_files": [],
+        "cost_estimate": None,
+        "cost_estimate_key": None,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -177,3 +182,34 @@ def regenerate_job(cfg: config_mod.AppConfig, entry: dict) -> None:
         updated["fidelity"],
         files,
     )
+
+
+def fetch_drive(session_key: str, url: str) -> None:
+    """The Drive-fetch button's action: download and store, or show a friendly error."""
+    try:
+        with st.spinner("Fetching from Google Drive..."):
+            fetched = drive.fetch_drive_folder(url)
+    except DriveFetchError as exc:
+        st.error(str(exc))
+    else:
+        st.session_state[session_key] = fetched
+        st.success(f"Fetched {len(fetched)} file(s) from Drive.")
+
+
+def get_cost_estimate(
+    cfg: config_mod.AppConfig,
+    credential_files: list[tuple[str, bytes]],
+    selected_jobs: list[tuple[str, bytes]],
+) -> dict:
+    """Cost estimate for the current materials/jobs, cached in session_state
+    so files aren't re-parsed on every unrelated widget interaction."""
+    llm_config = current_llm_config(cfg)
+    cache_key = (
+        tuple((n, len(d)) for n, d in credential_files),
+        tuple((n, len(d)) for n, d in selected_jobs),
+        llm_config.provider,
+    )
+    if st.session_state.cost_estimate_key != cache_key:
+        st.session_state.cost_estimate = cost.estimate_cost(llm_config, credential_files, selected_jobs)
+        st.session_state.cost_estimate_key = cache_key
+    return st.session_state.cost_estimate
