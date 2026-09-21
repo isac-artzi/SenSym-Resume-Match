@@ -108,6 +108,33 @@ def cover_letter_to_text(cover_letter: dict) -> str:
     return "\n\n".join(p for p in parts if p)
 
 
+def document_preview_text(doc_key: str, bundle: dict) -> str:
+    """Flatten any one of the seven bundle documents to plain text, for the
+    review panel's preview pane."""
+    if doc_key == "resume":
+        return resume_to_text(bundle.get("resume", {}))
+    if doc_key == "cover_letter":
+        return cover_letter_to_text(bundle.get("cover_letter", {}))
+    if doc_key == "intro_email":
+        email = bundle.get("intro_email", {})
+        return f"Subject: {email.get('subject', '')}\n\n{email.get('body', '')}"
+    if doc_key == "linkedin_message":
+        return bundle.get("linkedin_message", {}).get("body", "")
+    if doc_key == "elevator_pitch":
+        return bundle.get("elevator_pitch", {}).get("text", "")
+    if doc_key == "interview_prep":
+        prep = bundle.get("interview_prep", {})
+        lines = []
+        for item in prep.get("likely_questions", []):
+            lines.append(item.get("question", ""))
+            lines.extend(f"  - {p}" for p in item.get("talking_points", []))
+        if prep.get("questions_to_ask"):
+            lines.append("\nQuestions to ask:")
+            lines.extend(f"  - {q}" for q in prep["questions_to_ask"])
+        return "\n".join(lines)
+    return ""
+
+
 def run_for_job(
     profile: dict,
     job_filename: str,

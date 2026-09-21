@@ -79,6 +79,44 @@ def ingest_links(urls: list[str]) -> IngestResult:
     return result
 
 
+def gather_credentials(
+    files: list[tuple[str, bytes]], llm_config: LLMConfig | None = None
+) -> tuple[IngestResult, str]:
+    """Ingest a credentials folder/upload set, handling `links.txt` and
+    `preferences.txt`/`.md` specially per PRD §5.1.
+
+    Returns (result, preferences_text). `links.txt` is read as one URL per
+    line and fetched rather than treated as document text; a preferences
+    file is pulled out and returned separately rather than folded into the
+    profile source text.
+    """
+    ordinary_files = []
+    link_urls: list[str] = []
+    preferences_text = ""
+
+    for filename, data in files:
+        base = filename.rsplit("/", 1)[-1].lower()
+        if base == "links.txt":
+            link_urls.extend(_decode_text(data).splitlines())
+        elif base in ("preferences.txt", "preferences.md"):
+            preferences_text = _decode_text(data)
+        else:
+            ordinary_files.append((filename, data))
+
+    result = ingest_files(ordinary_files, llm_config)
+    if link_urls:
+        link_result = ingest_links(link_urls)
+        result.sources.extend(link_result.sources)
+        result.warnings.extend(link_result.warnings)
+
+    return result, preferences_text
+
+
+def identify_resume_candidates(sources: list[Source]) -> list[str]:
+    """Filenames that look like a resume/CV, for the base-resume selector."""
+    return [s.name for s in sources if "resume" in s.name.lower() or "cv" in s.name.lower()]
+
+
 def _ingest_one(filename: str, data: bytes, llm_config: LLMConfig | None) -> Source | None:
     ext = _extension(filename)
 

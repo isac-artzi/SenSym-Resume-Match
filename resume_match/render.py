@@ -20,16 +20,17 @@ from docx.shared import Pt
 BODY_FONT = "Calibri"
 BODY_SIZE = Pt(11)
 
-# filename -> (title used inside the doc, bundle key or fixed builder)
-DOCUMENT_ORDER = [
-    "resume",
-    "cover_letter",
-    "intro_email",
-    "linkedin_message",
-    "elevator_pitch",
-    "interview_prep",
-    "gap_analysis",
-]
+# Canonical document order and display labels, shared by the renderer and the
+# review UI so there is one place that knows what the seven documents are.
+DOCUMENT_LABELS = {
+    "resume": "Resume",
+    "cover_letter": "Cover Letter",
+    "intro_email": "Intro Email",
+    "linkedin_message": "LinkedIn",
+    "elevator_pitch": "Elevator Pitch",
+    "interview_prep": "Interview Prep",
+    "gap_analysis": "Gap Analysis",
+}
 
 
 def slugify(text: str) -> str:
