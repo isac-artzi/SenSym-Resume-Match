@@ -3,7 +3,8 @@
 Layout only: this file wires widgets to `resume_match/` functions and reads
 per-session state from `resume_match/session.py`. Extraction, prompting, and
 rendering all live in the other modules; nothing here talks to a model or a
-file format directly.
+file format directly. Tooltip copy lives in `ui.TOOLTIPS` to keep this file
+focused on wiring rather than prose.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ st.set_page_config(page_title=ui.APP_NAME, layout="centered")
 ui.inject_css()
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+TT = ui.TOOLTIPS
 
 
 # --- Section 1: Setup -------------------------------------------------------
@@ -28,7 +30,9 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
     upload_tab, form_tab = st.tabs(["Upload a config file", "Fill in the form"])
 
     with upload_tab:
-        uploaded = st.file_uploader("resume_match.env", type=["env", "txt"], key="config_upload")
+        uploaded = st.file_uploader(
+            "resume_match.env", type=["env", "txt"], key="config_upload", help=TT["config_upload"]
+        )
         if uploaded is not None:
             st.session_state.config_values.update(config_mod.parse_env_text(uploaded.getvalue().decode("utf-8")))
             st.success("Config loaded for this session.")
@@ -40,15 +44,20 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
             index=config_mod.PROVIDERS.index(cfg.provider) if cfg.provider in config_mod.PROVIDERS else 0,
             horizontal=True,
             key="form_provider",
+            help=TT["provider"],
         )
         st.session_state.config_values["LLM_PROVIDER"] = provider
 
         if provider != "ollama":
-            api_key = st.text_input("API key", value=cfg.api_key, type="password", key="form_api_key")
+            api_key = st.text_input(
+                "API key", value=cfg.api_key, type="password", key="form_api_key", help=TT["api_key"]
+            )
             st.session_state.config_values["API_KEY"] = api_key
         else:
             st.session_state.config_values["API_KEY"] = ""
-            ollama_url = st.text_input("Ollama base URL", value=cfg.ollama_base_url, key="form_ollama_url")
+            ollama_url = st.text_input(
+                "Ollama base URL", value=cfg.ollama_base_url, key="form_ollama_url", help=TT["ollama_url"]
+            )
             st.session_state.config_values["OLLAMA_BASE_URL"] = ollama_url
 
         if mode == "local":
@@ -58,7 +67,7 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
                 ("Jobs folder", "JOBS_DIR", "examples/jobs"),
                 ("Output folder", "OUTPUT_DIR", "applications"),
             ]:
-                value = st.text_input(label, value=cfg.get(key, default), key=f"form_{key}")
+                value = st.text_input(label, value=cfg.get(key, default), key=f"form_{key}", help=TT[key])
                 st.session_state.config_values[key] = value
 
         with st.expander("Preferences (optional)"):
@@ -69,11 +78,13 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
                 ("Resume max pages", "RESUME_MAX_PAGES"),
                 ("Things to avoid", "AVOID"),
             ]:
-                value = st.text_input(label, value=cfg.get(key), key=f"form_{key}")
+                value = st.text_input(label, value=cfg.get(key), key=f"form_{key}", help=TT[key])
                 st.session_state.config_values[key] = value
 
         with st.expander("Advanced", expanded=False):
-            model = st.text_input("Model (blank = provider default)", value=cfg.model, key="form_model")
+            model = st.text_input(
+                "Model (blank = provider default)", value=cfg.model, key="form_model", help=TT["model"]
+            )
             st.session_state.config_values["MODEL"] = model
 
         st.download_button(
@@ -81,6 +92,7 @@ def render_setup(cfg: config_mod.AppConfig, mode: str) -> None:
             data=config_mod.generate_env_text(st.session_state.config_values),
             file_name="resume_match.env",
             mime="text/plain",
+            help=TT["download_config"],
         )
 
 
@@ -98,6 +110,7 @@ def render_materials(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, by
             "Resume, transcripts, diplomas, links.txt, preferences.txt — files or a .zip",
             accept_multiple_files=True,
             key="credentials_upload",
+            help=TT["credentials_upload"],
         )
         files = session.expand_uploads(uploaded)
         st.text_input(
@@ -105,6 +118,7 @@ def render_materials(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, by
             key="drive_credentials_url",
             disabled=True,
             placeholder="Coming in v1.1",
+            help=TT["drive_credentials"],
         )  # TODO(v1.1): fetch via gdown when DRIVE_CREDENTIALS_URL is set
 
     if files:
@@ -113,7 +127,9 @@ def render_materials(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, by
         candidates = [n for n in names if "resume" in n.lower() or "cv" in n.lower()]
         resume_note = f"resume: {candidates[0]}" if candidates else "no resume detected"
         if len(candidates) > 1:
-            chosen = st.selectbox("Multiple resumes found — pick the base one", candidates)
+            chosen = st.selectbox(
+                "Multiple resumes found — pick the base one", candidates, help=TT["resume_selectbox"]
+            )
             st.session_state.selected_resume = chosen
             resume_note = f"resume: {chosen}"
         ui.status_line(f"{len(files)} files, {n_links} link file(s) · {resume_note}")
@@ -136,6 +152,7 @@ def render_jobs(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, bytes]]
             "One file per job posting — .pdf, .docx, .txt, .md, or a .zip",
             accept_multiple_files=True,
             key="jobs_upload",
+            help=TT["jobs_upload"],
         )
         files = session.expand_uploads(uploaded)
 
@@ -147,10 +164,10 @@ def render_jobs(mode: str, cfg: config_mod.AppConfig) -> list[tuple[str, bytes]]
         )
         return []
 
-    select_all = st.checkbox("Select all", value=True, key="select_all_jobs")
+    select_all = st.checkbox("Select all", value=True, key="select_all_jobs", help=TT["select_all"])
     selected = []
     for name, data in files:
-        if st.checkbox(name, value=select_all, key=f"job_check_{name}"):
+        if st.checkbox(name, value=select_all, key=f"job_check_{name}", help=f"Include {name} in this batch."):
             selected.append((name, data))
     return selected
 
@@ -168,7 +185,9 @@ def render_generate(
 
     problems = config_mod.validate(cfg)
     disabled = bool(problems) or not credential_files or not selected_jobs
-    if st.button("Create application materials", type="primary", disabled=disabled):
+    if st.button(
+        "Create application materials", type="primary", disabled=disabled, help=TT["generate_button"]
+    ):
         session.run_generation(cfg, credential_files, selected_jobs)
         st.rerun()
 
@@ -238,9 +257,12 @@ def render_review(cfg: config_mod.AppConfig, mode: str) -> None:
                         file_name=f"{doc_key}.docx",
                         mime=DOCX_MIME,
                         key=f"download_{folder_name}_{doc_key}",
+                        help=TT["download_doc"],
                     )
 
-            if st.button("Regenerate this job's documents", key=f"regen_{folder_name}"):
+            if st.button(
+                "Regenerate this job's documents", key=f"regen_{folder_name}", help=TT["regenerate"]
+            ):
                 try:
                     session.regenerate_job(cfg, entry)
                 except LLMError as exc:
@@ -252,12 +274,16 @@ def render_review(cfg: config_mod.AppConfig, mode: str) -> None:
     if mode == "cloud":
         zip_bytes = render.build_zip({name: entry["files"] for name, entry in results.items()})
         st.download_button(
-            "Download everything (.zip)", data=zip_bytes, file_name="applications.zip", mime="application/zip"
+            "Download everything (.zip)",
+            data=zip_bytes,
+            file_name="applications.zip",
+            mime="application/zip",
+            help=TT["download_zip"],
         )
     else:
         st.caption(f"Saved to {cfg.output_dir()}")
 
-    if st.button("Start over"):
+    if st.button("Start over", help=TT["start_over"]):
         st.session_state.clear()
         st.rerun()
 
