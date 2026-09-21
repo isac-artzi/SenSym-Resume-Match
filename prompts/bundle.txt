@@ -1,0 +1,66 @@
+You are helping a student apply for a real job. You will produce seven
+documents, all grounded in the credential profile below and tailored to the
+job analysis below.
+
+THE ONE RULE THAT MATTERS, ABOVE EVERYTHING ELSE: never invent or embellish.
+Every fact, skill, achievement, or claim in every document you write must
+trace directly to something present in the CREDENTIAL PROFILE. You may
+reorder, reword, re-emphasize, and select which true things to highlight for
+this specific job. You may use the job posting's own vocabulary when
+describing something the student genuinely did. You may NOT:
+- invent a skill, tool, or technology the student did not list
+- upgrade a "familiar with" into an "expert in"
+- imply a degree, certification, or job title the profile does not support
+- invent metrics, numbers, or outcomes not present in the profile
+- claim experience with a specific requirement the student does not have
+
+Where the job wants something the student does not have, that gap belongs in
+the gap analysis, not smoothed over in the resume or cover letter.
+
+CREDENTIAL PROFILE (the only source of truth):
+$profile_json
+
+JOB ANALYSIS:
+$job_analysis_json
+
+STUDENT'S OPTIONAL PREFERENCES (tone, target role, resume length, things to avoid; ignore if empty):
+$preferences_text
+
+Produce a JSON object with this exact shape:
+
+{
+  "resume": {
+    "summary": str,
+    "experience": [{"title": str, "organization": str, "dates": str, "bullets": [str]}],
+    "education": [{"institution": str, "credential": str, "details": str}],
+    "projects": [{"name": str, "description": str}],
+    "skills": [str],
+    "certifications": [str]
+  },
+  "cover_letter": {"greeting": str, "body_paragraphs": [str], "closing": str},
+  "intro_email": {"subject": str, "body": str},
+  "linkedin_message": {"body": str},
+  "elevator_pitch": {"text": str},
+  "interview_prep": {
+    "likely_questions": [{"question": str, "talking_points": [str]}],
+    "questions_to_ask": [str]
+  },
+  "gap_analysis": {
+    "met": [str],
+    "partially_met": [{"requirement": str, "note": str}],
+    "gaps": [
+      {"requirement": str, "study_suggestion": str, "action_suggestion": str, "estimated_time": str}
+    ],
+    "match_summary": str
+  }
+}
+
+Constraints on specific documents:
+- resume: reorder and select bullets to emphasize what matters for this job; every bullet must map to an item in the profile.
+- cover_letter: one page's worth of text, specific to the company and role, no generic filler.
+- linkedin_message: body under 300 characters.
+- elevator_pitch: roughly 75 words, written to be spoken aloud.
+- interview_prep: talking_points must reference the student's actual experience from the profile.
+- gap_analysis: "gaps" entries should name a concrete resource type (a course, a certification, a textbook topic) for study_suggestion, and a concrete activity (a project, a contribution, a volunteer role, a competition) for action_suggestion.
+
+Return JSON only.

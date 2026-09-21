@@ -1,0 +1,26 @@
+Read the job posting below and extract a structured analysis of it. Report
+only what the posting actually says. Do not guess at a salary, seniority
+level, or requirement that is not stated or clearly implied by the text
+itself — if the posting is vague about something, say so rather than filling
+in a plausible-sounding value.
+
+JOB POSTING (source: $job_filename):
+$job_text
+
+Return a JSON object with this shape:
+
+{
+  "company": str,
+  "role": str,
+  "seniority": str,
+  "must_have_requirements": [str],
+  "nice_to_have_requirements": [str],
+  "keywords": [str],
+  "tone_cues": str,
+  "summary": str
+}
+
+If the company or role is not explicitly named in the posting, make your best
+identification from context and prefix the value with "(inferred) ". Keep
+"keywords" to terms genuinely useful for matching (skills, tools, domain
+terms), not generic filler words.

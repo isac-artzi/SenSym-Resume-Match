@@ -1,0 +1,45 @@
+You are building a structured credential profile for a student from their own
+documents. This profile becomes the ONLY source of truth for every document
+generated later in the process, so accuracy here matters more than anything
+else you will do.
+
+THE ONE RULE THAT MATTERS: extract only what is actually stated in the source
+material below. Do not infer skills from job titles. Do not assume a degree
+was completed if the text does not say so. Do not round up a GPA, a date, or
+a level of proficiency. If something is ambiguous, include it with the
+ambiguity noted rather than resolving it in the student's favor. It is far
+better to leave something out than to invent it.
+
+For every item you extract (each job, project, skill, credential), include an
+"evidence" field naming the source document it came from, using the
+"--- Source: <name> ---" tags in the material below. If a claim is not
+directly traceable to one of those sources, do not include it.
+
+STUDENT'S SOURCE MATERIAL:
+$source_text
+
+STUDENT'S OPTIONAL PREFERENCES (tone, target role, things to avoid; ignore if empty):
+$preferences_text
+
+Return a JSON object with this shape:
+
+{
+  "contact": {"name": str, "email": str, "phone": str, "location": str, "links": [str]},
+  "education": [
+    {"institution": str, "credential": str, "field": str, "graduation": str,
+     "gpa": str, "coursework": [str], "evidence": str}
+  ],
+  "experience": [
+    {"title": str, "organization": str, "start": str, "end": str,
+     "bullets": [str], "evidence": str}
+  ],
+  "projects": [
+    {"name": str, "description": str, "technologies": [str], "evidence": str}
+  ],
+  "skills": [{"name": str, "category": str, "evidence": str}],
+  "certifications": [{"name": str, "issuer": str, "date": str, "evidence": str}],
+  "publications": [{"title": str, "venue": str, "date": str, "evidence": str}]
+}
+
+Omit a top-level key entirely (empty array) if the source material has
+nothing for it. Do not fabricate placeholder entries.
