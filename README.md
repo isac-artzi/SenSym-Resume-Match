@@ -48,12 +48,78 @@ open the app the way you want to run it.
 
 ## Quick start (local)
 
+Works the same way on macOS, Windows, and Linux — Python and a browser are
+the only requirements. Pick your platform below. (If you'd rather skip the
+virtual environment step, you can — it just keeps this app's dependencies
+separate from anything else on your system, which is worth doing.)
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+Needs Python 3.11+. Check with `python3 --version`; if you don't have it,
+install it from [python.org](https://www.python.org/downloads/macos/) or via
+Homebrew (`brew install python@3.12`).
+
 ```bash
 git clone https://github.com/isac-artzi/SenSym-Resume-Match.git
 cd SenSym-Resume-Match
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
 ```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+Needs Python 3.11+. Install it from
+[python.org](https://www.python.org/downloads/windows/) — check "Add
+python.exe to PATH" during install — or from the Microsoft Store. Check with
+`python --version` in PowerShell.
+
+```powershell
+git clone https://github.com/isac-artzi/SenSym-Resume-Match.git
+cd SenSym-Resume-Match
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+If PowerShell blocks the activation script with an "execution policy"
+error, run this once first (for the current session only, nothing
+permanent): `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
+Using Command Prompt instead of PowerShell? Activate with
+`.venv\Scripts\activate.bat` instead of the `.ps1` line above.
+
+</details>
+
+<details>
+<summary><strong>Linux</strong></summary>
+
+Needs Python 3.11+ and the matching `venv` package. Most distributions ship
+Python 3, but you may need the venv module separately, e.g. on
+Debian/Ubuntu: `sudo apt install python3-venv`.
+
+```bash
+git clone https://github.com/isac-artzi/SenSym-Resume-Match.git
+cd SenSym-Resume-Match
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+</details>
+
+Whichever platform you're on, `streamlit run app.py` opens the app in your
+default browser at `http://localhost:8501`. Leave the terminal window open
+while you use the app; closing it stops the app. Next time, you don't need
+to recreate the virtual environment — just `cd` into the folder, re-activate
+it (the `source .venv/bin/activate` or `.venv\Scripts\Activate.ps1` line
+above), and run `streamlit run app.py` again.
 
 Then, in the app:
 
@@ -107,12 +173,22 @@ all is safer treated as temporary.
 
 ### Using Ollama (local models, no API key)
 
-1. Install Ollama from [ollama.com](https://ollama.com).
+Ollama installs on macOS, Windows, and Linux and lets you run the app
+entirely on your own machine, with no API key and no per-use cost — you
+trade that for slower generation and, on smaller models, a higher chance of
+instruction-following mistakes.
+
+1. Install Ollama from [ollama.com](https://ollama.com) (installers for all
+   three platforms).
 2. Pull a model: `ollama pull llama3.1` (or any model you prefer — a
    vision-capable model if you want scanned-image transcription to work).
 3. In Setup, choose provider "ollama." No API key is needed.
 4. Ollama only works in **local mode** — Streamlit Community Cloud can't
    reach a model running on your own machine.
+
+**For installation steps per operating system, hardware requirements (how
+much RAM/disk a given model needs), GPU notes, and troubleshooting, see
+[`OLLAMA_SETUP.md`](OLLAMA_SETUP.md).**
 
 ## What goes in your credentials folder
 
